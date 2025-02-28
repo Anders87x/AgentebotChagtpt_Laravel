@@ -13,16 +13,13 @@ class WhatsAppWebhookController extends Controller
     // **1️⃣ Verificación del Webhook (Meta nos enviará un challenge)**
     public function verify(Request $request)
     {
-        CustomLogger::log('info', 'Verificación del Webhook iniciada.', ['query' => json_encode($request->all())]);
 
         $verifyToken = env('WHATSAPP_VERIFY_TOKEN'); // Token de verificación en .env
 
         if ($request->hub_mode === 'subscribe' && $request->hub_verify_token === $verifyToken) {
-            CustomLogger::log('info', 'Webhook verificado correctamente.');
             return response($request->hub_challenge, 200);
         }
 
-        CustomLogger::log('error', 'Fallo en la verificación del Webhook.');
         return response('No autorizado', 403);
     }
 
@@ -31,11 +28,9 @@ class WhatsAppWebhookController extends Controller
     {
         try {
             // **Guardar el evento recibido en logs para depuración**
-            CustomLogger::log('info', "Evento de WhatsApp recibido.", ['query' => json_encode($request->all())]);
 
             // **Verificar si el evento contiene un mensaje**
             if (!isset($request['entry'][0]['changes'][0]['value']['messages'])) {
-                CustomLogger::log('warning', "No se encontraron mensajes en el evento recibido.");
                 return response()->json(['message' => 'No hay mensajes.'], 200);
             }
 
@@ -55,7 +50,6 @@ class WhatsAppWebhookController extends Controller
                 ['name' => 'Usuario WhatsApp']
             );
 
-            CustomLogger::log('info', "Chat verificado o creado.", ['chat_id' => $chat->id]);
 
             // **Guardar el mensaje del usuario**
             ChatMessage::create([
@@ -64,7 +58,6 @@ class WhatsAppWebhookController extends Controller
                 'sender' => 'user',
             ]);
 
-            CustomLogger::log('info', "Mensaje del usuario guardado en la BD.", ['chat_id' => $chat->id, 'message' => $userMessage]);
 
             // **Llamar al bot para generar la respuesta**
             $botResponse = $this->getBotResponse($userMessage);
@@ -76,14 +69,12 @@ class WhatsAppWebhookController extends Controller
                 'sender' => 'agent',
             ]);
 
-            CustomLogger::log('info', "Respuesta del bot guardada en la BD.", ['chat_id' => $chat->id, 'message' => $botResponse]);
 
             // **Enviar la respuesta al usuario vía WhatsApp API**
             $this->sendWhatsAppMessage($whatsappNumber, $botResponse);
 
             return response()->json(['message' => 'Mensaje procesado'], 200);
         } catch (\Exception $e) {
-            CustomLogger::log('error', "Error en la recepción de mensaje.", ['exception' => $e->getMessage()]);
             return response()->json(['message' => 'Error interno del servidor.'], 500);
         }
     }
@@ -91,7 +82,6 @@ class WhatsAppWebhookController extends Controller
     // **3️⃣ Generar Respuesta del Bot Usando ChatGPT**
     private function getBotResponse($userMessage)
     {
-        CustomLogger::log('info', "Generando respuesta del bot.", ['user_message' => $userMessage]);
 
         // Simulación de respuesta, puedes reemplazarlo con integración a ChatGPT
         return "Gracias por tu mensaje, estamos procesando tu solicitud.";
@@ -117,7 +107,6 @@ class WhatsAppWebhookController extends Controller
                 "Content-Type: application/json"
             ];
 
-            CustomLogger::log('info', "Enviando mensaje a WhatsApp API.", ['to' => $to, 'message' => $message]);
 
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
@@ -129,10 +118,8 @@ class WhatsAppWebhookController extends Controller
             $response = curl_exec($ch);
             curl_close($ch);
 
-            CustomLogger::log('info', "Respuesta de WhatsApp API recibida.", ['response' => $response]);
 
         } catch (\Exception $e) {
-            CustomLogger::log('error', "Error al enviar mensaje a WhatsApp API.", ['exception' => $e->getMessage()]);
         }
     }
 }
