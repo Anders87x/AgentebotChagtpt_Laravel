@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 use App\Models\Chat;
 use App\Models\ChatMessage;
+use App\Helpers\CustomLogger;
 
 class ChatController extends Controller
 {
@@ -123,16 +124,16 @@ class ChatController extends Controller
                     return response()->json(['response' => $responseText]);
 
                 } catch (\Exception $e) {
-                    Log::error("Error al ejecutar la consulta: " . $e->getMessage());
+                    CustomLogger::log('info', 'Error al ejecutar la consulta: ', ['query' => $e->getMessage()]);
                     return response()->json(['response' => 'Hubo un error al procesar la consulta.']);
                 }
             }
 
-            Log::error("Consulta no válida.");
+            CustomLogger::log('info', 'Consulta no válida.', "");
             return response()->json(['response' => 'Error: No se pudo interpretar la consulta.']);
 
         } catch (\Exception $e) {
-            Log::error("Error al conectar con OpenAI: " . $e->getMessage());
+            CustomLogger::log('info', 'Error al conectar con OpenAI: ', ['query' => $e->getMessage()]);
             return response()->json(['response' => 'Error al conectar con OpenAI: ' . $e->getMessage()]);
         }
     }

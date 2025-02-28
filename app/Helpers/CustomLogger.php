@@ -1,16 +1,26 @@
+<?php
+
 namespace App\Helpers;
 
-<?php
-use App\Models\LogEntry;
+use Illuminate\Support\Facades\Log;
 
 class CustomLogger
 {
     public static function log($level, $message, $context = [])
     {
-        LogEntry::create([
+        // Convertimos el contexto a JSON si no está vacío
+        $contextJson = !empty($context) ? json_encode($context) : null;
+
+        // Guardamos en el log de Laravel
+        Log::$level($message, $context);
+
+        // Si tienes una tabla de logs en la BD, puedes usar esto:
+        \DB::table('logs')->insert([
             'level' => $level,
             'message' => $message,
-            'context' => json_encode($context),
+            'context' => $contextJson,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 }
