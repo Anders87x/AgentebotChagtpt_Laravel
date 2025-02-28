@@ -1,0 +1,11 @@
+php artisan migrate:fresh --seed
+
+-Local
+DB_DATABASE=agentechatgpt
+DB_USERNAME=root
+DB_PASSWORD=
+
+-Produccion
+DB_DATABASE=u245799734_agentelaravel
+DB_USERNAME=u245799734_agentelaravel
+DB_PASSWORD=AgenteBot.2025
