@@ -26,7 +26,7 @@ class WhatsAppWebhookController extends Controller
     public function receive(Request $request)
     {
         // **Guardar el evento recibido en logs para depuración**
-        Log::info("Evento de WhatsApp recibido: " . json_encode($request->all()));
+        CustomLogger::log('info', "Evento de WhatsApp recibido: ", ['query' => json_encode($request->all())]);
 
         // **Verificar si el evento contiene un mensaje**
         if (!isset($request['entry'][0]['changes'][0]['value']['messages'])) {
@@ -104,6 +104,6 @@ class WhatsAppWebhookController extends Controller
         $response = curl_exec($ch);
         curl_close($ch);
 
-        Log::info("Respuesta de WhatsApp API: " . $response);
+        CustomLogger::log('info', "Respuesta de WhatsApp API: ", ['query' => $response]);
     }
 }
