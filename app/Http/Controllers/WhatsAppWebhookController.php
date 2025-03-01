@@ -80,7 +80,7 @@ class WhatsAppWebhookController extends Controller
             CustomLogger::log('info', "Respuesta del bot guardada en la BD.", ['chat_id' => $chat->id, 'message' => $botResponse]);
 
             // **Enviar la respuesta al usuario vía WhatsApp API**
-            $this->sendWhatsAppMessage($whatsappNumber, "Hola, soy tu asistente virtual. ¿En qué puedo ayudarte?");
+            $this->sendWhatsAppMessage($whatsappNumber, $botResponse);
 
             return response()->json(['message' => 'Mensaje procesado'], 200);
         } catch (\Exception $e) {
@@ -109,7 +109,9 @@ class WhatsAppWebhookController extends Controller
 
             $data = [
                 "messaging_product" => "whatsapp",
+                "recipient_type"=> "individual",
                 "to" => $to,
+                "type" => "text",
                 "text" => ["body" => $message],
             ];
 
