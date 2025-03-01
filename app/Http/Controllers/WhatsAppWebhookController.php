@@ -41,6 +41,7 @@ class WhatsAppWebhookController extends Controller
 
             $messageData = $request['entry'][0]['changes'][0]['value']['messages'][0] ?? null;
             $whatsappNumber = $request['entry'][0]['changes'][0]['value']['contacts'][0]['wa_id'] ?? null;
+            $userName = $request['entry'][0]['changes'][0]['value']['contacts'][0]['profile']['name'] ?? 'Usuario WhatsApp';
             $userMessage = $messageData['text']['body'] ?? '';
 
             // **Verificar si los datos esenciales existen**
@@ -52,7 +53,7 @@ class WhatsAppWebhookController extends Controller
             // **Verificar si el chat ya existe, sino crearlo**
             $chat = Chat::firstOrCreate(
                 ['whatsapp_number' => $whatsappNumber],
-                ['name' => 'Usuario WhatsApp']
+                ['name' => $userName] // ✅ Guardamos el nombre del usuario de WhatsApp
             );
 
             CustomLogger::log('info', "Chat verificado o creado.", ['chat_id' => $chat->id]);
@@ -79,7 +80,7 @@ class WhatsAppWebhookController extends Controller
             CustomLogger::log('info', "Respuesta del bot guardada en la BD.", ['chat_id' => $chat->id, 'message' => $botResponse]);
 
             // **Enviar la respuesta al usuario vía WhatsApp API**
-            $this->sendWhatsAppMessage($whatsappNumber, $botResponse);
+            $this->sendWhatsAppMessage($whatsappNumber, "Hola, soy tu asistente virtual. ¿En qué puedo ayudarte?");
 
             return response()->json(['message' => 'Mensaje procesado'], 200);
         } catch (\Exception $e) {
